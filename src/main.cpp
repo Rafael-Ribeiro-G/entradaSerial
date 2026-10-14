@@ -2,10 +2,11 @@
 
 void leituraBloqueante();
 void leituraNaoBloqueante();
+void processaFrase(const char* texto);
 
 void setup() 
 {
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial.setTimeout(2000); 
   //* readStringUntil espera no máximo por caractere esse tempo em (ms) pelo '\n'
   //* O padrão é 1000ms
@@ -16,19 +17,46 @@ void setup()
 
 void loop() 
 {
-  
+  leituraNaoBloqueante();
 }
 
 void leituraNaoBloqueante()
 {
   const int tamanhoMaximo = 50; //* Tamanho do vetor (incluir '/0')
-  char linha[tamanhoMaximo];
-  int position = 0;
+  static char frase[tamanhoMaximo];
+  static int position = 0;
 
   while(Serial.available() > 0)
   {
     char c = Serial.read();
+
+    if(c == '\r') continue;
+    //* o continue pula o restante do while naquela volta e passa pra leitura
+    //* do próximo caractere. O '/r' é lido e simplesmente descartado, sem entrar
+    //* no vetor 
+
+    if(c == '\n')
+    {
+      frase[position] = '\0';
+      
+      if(position > 0) processaFrase(frase);
+      
+      position = 0;
+    }
+    else if (position < tamanhoMaximo - 1)
+    {
+      frase[position] = c;
+      position++;
+    }
   }
+}
+
+void processaFrase(const char* texto)
+{
+  Serial.printf("Recebido: [%s]\n\r", texto);
+
+  if(strcmp(texto, "ola") == 0)
+    Serial.println("Olá para você também!");
 }
 
 void leituraBloqueante()
