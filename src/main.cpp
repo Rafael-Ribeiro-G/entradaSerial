@@ -20,8 +20,6 @@ void setup()
   //* readStringUntil espera no máximo por caractere esse tempo em (ms) pelo '\n'
   //* O padrão é 1000ms
 
-  Serial.println();
-  Serial.println("Digite o seu nome e pressione ENTER: ");
 }
 
 void loop() 
@@ -89,6 +87,7 @@ void processaFrase(char* texto)
     vermelho = 255;
     verde = 0;
     azul = 0;
+    brilho = 100;
   }
 
   else if(strcasecmp(comando, "VERDE") == 0)
@@ -96,6 +95,7 @@ void processaFrase(char* texto)
     vermelho = 0;
     verde = 255;
     azul = 0;
+    brilho = 100;
   }
 
   else if(strcasecmp(comando, "AZUL") == 0)
@@ -103,6 +103,7 @@ void processaFrase(char* texto)
     vermelho = 0;
     verde = 0;
     azul = 255;
+    brilho = 100;
   }
 
   else if(strcasecmp(comando, "BRANCO") == 0)
@@ -110,6 +111,7 @@ void processaFrase(char* texto)
     vermelho = 255;
     verde = 255;
     azul = 255;
+    brilho = 100;
   }
 
   else if(strcasecmp(comando, "DESLIGA") == 0)
@@ -154,6 +156,7 @@ void processaFrase(char* texto)
   }
   //if(strcmp(texto, "ola") == 0)
     //Serial.println("Olá para você também!");
+  aplicarCor();
 }
 
 void aplicarCor()
