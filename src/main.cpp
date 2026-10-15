@@ -2,7 +2,16 @@
 
 void leituraBloqueante();
 void leituraNaoBloqueante();
-void processaFrase(const char* texto);
+void processaFrase(char* texto);
+int lerProximoNumero(char*& cursor);
+void aplicarCor();
+
+int vermelho = 0;
+int verde = 0;
+int azul = 0;
+int branco = 0;
+int brilho = 0;
+
 
 void setup() 
 {
@@ -51,12 +60,123 @@ void leituraNaoBloqueante()
   }
 }
 
-void processaFrase(const char* texto)
+//* VERMELHO
+//* VERDE
+//* AZUL
+//* BRANCO 
+//* DESLIGA
+//* RGB r g b (ex.: RGB 200 125 98)
+//* BRILHO n (0 A 100%)
+void processaFrase(char* texto)
 {
   Serial.printf("Recebido: [%s]\n\r", texto);
 
-  if(strcmp(texto, "ola") == 0)
-    Serial.println("Olá para você também!");
+  //* O ponteiro indica o endereço da variável
+  char* comando = texto;
+  char* parametro = NULL; //* NULL ---> '\0'
+
+  char* espaco = strchr(texto, ' ');
+  if(espaco != NULL) //* Se ele encontrou o espaço...
+  {
+    parametro = espaco + 1;
+    *espaco = '\0';
+  }
+
+  //* strcmp ---> Compara a ordem léxica das palavras
+  //* strcasecmp ---> Compara a ordem léxica das palavras mas ignora se foir maiúscula ou minúscula 
+  if(strcasecmp(comando, "VERMELHO") == 0)
+  {
+    vermelho = 255;
+    verde = 0;
+    azul = 0;
+  }
+
+  else if(strcasecmp(comando, "VERDE") == 0)
+  {
+    vermelho = 0;
+    verde = 255;
+    azul = 0;
+  }
+
+  else if(strcasecmp(comando, "AZUL") == 0)
+  {
+    vermelho = 0;
+    verde = 0;
+    azul = 255;
+  }
+
+  else if(strcasecmp(comando, "BRANCO") == 0)
+  {
+    vermelho = 255;
+    verde = 255;
+    azul = 255;
+  }
+
+  else if(strcasecmp(comando, "DESLIGA") == 0)
+  {
+    vermelho = 0;
+    verde = 0;
+    azul = 0;
+  }
+
+  else if(strcasecmp(comando, "RGB") == 0)
+  {
+    if(parametro == NULL)
+    {
+      Serial.println("Você é burro? É pra usar o comando: RGB r g b (0 a 255)");
+      return;
+    }
+  
+    char* cursor = parametro;
+
+    vermelho = constrain(lerProximoNumero(cursor), 0, 255); //* Limita o valor já convertido para int de 0 a 255
+    verde = constrain(lerProximoNumero(cursor), 0, 255); //* Limita o valor já convertido para int de 0 a 255
+    azul = constrain(lerProximoNumero(cursor), 0, 255); //* Limita o valor já convertido para int de 0 a 255
+  }
+
+  else if(strcasecmp(comando, "BRILHO") == 0)
+  {
+    if(parametro == NULL)
+    {
+      Serial.println("Use o comando: BRILHO n (0 a 100)");
+      return;
+    }
+
+    brilho = constrain(atoi(parametro), 0, 100);
+  }
+
+  else
+  {
+    char buffer[100];
+    snprintf(buffer, sizeof(buffer), "Comando: [%s] não existe\n\r", comando);
+    Serial.print(buffer);
+    return;
+  }
+  //if(strcmp(texto, "ola") == 0)
+    //Serial.println("Olá para você também!");
+}
+
+void aplicarCor()
+{
+  int r = vermelho * brilho / 100;
+  int g = verde * brilho / 100;
+  int b = azul * brilho / 100;
+
+  //* neopixelWrite ---> Controla o LED RGB
+  neopixelWrite(PIN_RGB_LED, r, g, b);
+
+  char bufferMensagem[80];
+
+  snprintf(bufferMensagem, sizeof(bufferMensagem), "Cor: R = [%3d] | G = [%3d] | B = [%3d] | Brilho: [%3d %%] | HEX: [#%02X#%02X#%02X]", vermelho, verde, azul, brilho, r, g, b);
+  Serial.println(bufferMensagem);
+}
+
+int lerProximoNumero(char*& cursor)
+{
+  int valor = atoi(cursor);
+  char* espaco = strchr(cursor, ' ');
+  cursor = (espaco != NULL) ? espaco + 1 : NULL;
+  return valor;
 }
 
 void leituraBloqueante()
